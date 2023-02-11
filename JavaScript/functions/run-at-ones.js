@@ -2,6 +2,8 @@ function main() {
 	console.log("Hello");
 }
 const CALLER_TIMEOUT = 5000;  			// 5 seconds
+var is_called = true;
+
 function run_ones() {
     if (is_called) {
         is_called = false;
