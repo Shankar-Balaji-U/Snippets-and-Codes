@@ -12,6 +12,6 @@ function run_ones() {
     }
 }
 
-for (int i=0; i < 10; i++) {
+for (var i=0; i < 10; i++) {
 	run_ones();
 }
