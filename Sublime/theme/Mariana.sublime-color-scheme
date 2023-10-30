@@ -1,0 +1,40 @@
+// Documentation at https://www.sublimetext.com/docs/color_schemes.html
+{
+	"variables":
+	{
+		"blue3": "hsl(215, 18%, 11%)",
+		"orange": "hsl(32, 97%, 54%)",
+		"blue10": "hsl(236.25, 6.67%, 47.06%)",
+		"pink10": "rgb(176, 83, 215)",
+		"green10": "hsl(158, 100%, 41%)",
+		"green11": "hsl(60, 50%, 55%)",
+		"violet10": "hsl(270.24, 51.46%, 53.14%)",
+
+	},
+	"globals":
+	{
+	},
+	"rules":
+	[
+		{
+            "name": "Comment",
+            "scope": "comment, punctuation.definition.comment",
+            "foreground": "var(blue10)"
+        },
+        {
+            "name": "String",
+            "scope": "string",
+            "foreground": "var(green11)"
+        },
+        {
+            "name": "Keyword",
+            "scope": "keyword - keyword.operator, keyword.operator.word",
+            "foreground": "var(red)"
+        },
+        {
+            "name": "Operators",
+            "scope": "keyword.operator",
+            "foreground": "var(green10)"
+        },
+	]
+}
