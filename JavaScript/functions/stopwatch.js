@@ -1,8 +1,7 @@
-
 class StopWatch extends EventTarget {
     fromTime = null;
     toTime = null;
-    isPaused = false;
+    state = null;
 
     totalTime = {
         milliseconds: 0,
@@ -14,43 +13,58 @@ class StopWatch extends EventTarget {
     interval = 10;
     timerID = null;
 
+    constructor() {
+        super();
+        this.state = this.STATE.Stopped;
+    }
+
+    get STATE() {
+        return {
+            Started: 0,
+            Stopped: 1,
+            Played:2,
+            Paused: 3
+        };
+    }
+
     _runTimer() {
         var $this = this;
         this.timerID = setInterval(function() {
-                $this.addTime($this.interval);
-            }, this.interval);
+            $this.addTime($this.interval);
+        }, this.interval);
     }
-    
+
     start() {
-        if (this.isPaused) {
+        if (this.state !== this.STATE.Stopped)
             return;
-        }
-        this._runTimer();
         this.fromTime = new Date();
+        this._runTimer();
+        this.state = this.STATE.Started;
         this.dispatchEvent(new CustomEvent("start"));
     }
 
     pause() {
-        if (this.isPaused) {
+        if (this.state !== this.STATE.Played)
             return;
-        }
         clearInterval(this.timerID);
-        this.isPaused = true;
+        this.state = this.STATE.Paused;
         this.dispatchEvent(new CustomEvent("pause"));
     }
 
     play() {
-        if (!this.isPaused) {
+        if (this.state !== this.STATE.Paused)
             return;
-        }
         this._runTimer();
-        this.isPaused = false;
+        this.state = this.STATE.Played;
         this.dispatchEvent(new CustomEvent("play"));
     }
 
     stop() {
+        if (this.state !== this.STATE.Started)
+            return;
         this.toTime = new Date();
         clearInterval(this.timerID);
+        this.state = this.STATE.Stopped;
         this.dispatchEvent(new CustomEvent("stop"));
         this.totalTime = {
             milliseconds: 0,
@@ -58,6 +72,7 @@ class StopWatch extends EventTarget {
             minutes: 0,
             hours: 0
         };
+        this.timerID = null;
     }
 
     addTime(milliseconds) {
@@ -88,3 +103,4 @@ let counter = new StopWatch();
 counter.addEventListener('counting-milliseconds', function(event) {
   console.log(event.detail);
 });
+counter.start();
