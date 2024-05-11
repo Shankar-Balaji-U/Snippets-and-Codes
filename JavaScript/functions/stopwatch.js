@@ -30,8 +30,8 @@ class StopWatch extends EventTarget {
     _runTimer() {
         var $this = this;
         this.timerID = setInterval(function() {
-                $this.addTime($this.interval);
-            }, this.interval);
+            $this.addTime($this.interval);
+        }, this.interval);
     }
 
     start() {
@@ -44,7 +44,7 @@ class StopWatch extends EventTarget {
     }
 
     pause() {
-                if (!([this.STATE.Played, this.STATE.Started].includes(this.state))) // not Played or Started
+        if (!([this.STATE.Played, this.STATE.Started].includes(this.state))) // not Played or Started
             return;
         clearInterval(this.timerID);
         this.state = this.STATE.Paused;
