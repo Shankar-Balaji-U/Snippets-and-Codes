@@ -68,7 +68,6 @@ codeunit 50201 CITReceiptToInvoiceMgmt
                 "Applies-to ID" := PurchOrder."Applies-to ID";
                 "GST Order Address State" := PurchOrder."GST Order Address State";
                 "POS Out Of India" := PurchOrder."POS Out Of India";
-                Modify();
             end;
             Modify();
         end;
@@ -76,20 +75,15 @@ codeunit 50201 CITReceiptToInvoiceMgmt
         PurchOrderCmt.SetRange("No.", FromPurchRcptHeader."Order No.");
         PurchOrderCmt.SetRange("Document Line No.", 0);
 
-        PurchInvCmt.Validate("Document Type", PurchInvCmt."Document Type"::Invoice);
-        PurchInvCmt.Validate("No.", ToPurchHeader."No.");
-        PurchInvCmt.Validate("Document Line No.", 0);
-        PurchInvCmt.Insert(true);
-
-        PurchInvCmt.SetRange("Document Type", PurchInvCmt."Document Type"::Invoice);
-        PurchInvCmt.SetRange("No.", ToPurchHeader."No.");
-        PurchInvCmt.SetRange("Document Line No.", 0);
         if PurchOrderCmt.FindSet() then begin
             repeat
+                PurchInvCmt."Document Type" := PurchInvCmt."Document Type"::Invoice;
+                PurchInvCmt."No." := ToPurchHeader."No.";
+                PurchInvCmt."Line No." := PurchOrderCmt."Line No.";
+                PurchInvCmt.Insert(true);
+
                 Message('PurchOrdCmt No. %1 / PurchInvCmt No.%2',PurchOrderCmt."No.",PurchInvCmt."No.");
-                PurchInvCmt.Validate(Date, PurchOrderCmt.Date);
-                PurchInvCmt.Validate(Code, PurchOrderCmt.Code);
-                PurchInvCmt.Validate(Comment, PurchOrderCmt.Comment);
+                PurchInvCmt.TransferFields(PurchOrderCmt, false);
                 PurchInvCmt.Modify();
             until PurchOrderCmt.Next() = 0
         end;
