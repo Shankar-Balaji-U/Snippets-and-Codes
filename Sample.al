@@ -82,7 +82,7 @@ codeunit 50201 CITReceiptToInvoiceMgmt
                 PurchInvCmt."Line No." := PurchOrderCmt."Line No.";
                 PurchInvCmt.Insert(true);
 
-                Message('PurchOrdCmt No. %1 / PurchInvCmt No.%2',PurchOrderCmt."No.",PurchInvCmt."No.");
+                Message('PurchOrdCmt No. %1 / PurchInvCmt No.%2', PurchOrderCmt."No.", PurchInvCmt."No.");
                 PurchInvCmt.TransferFields(PurchOrderCmt, false);
                 PurchInvCmt.Modify();
             until PurchOrderCmt.Next() = 0
@@ -90,39 +90,38 @@ codeunit 50201 CITReceiptToInvoiceMgmt
 
         Message('Comment Header Transfer Complete');
         /////////cmt header complete/////////////
+        // PurchOrderCmt.Reset();
+        // PurchOrderCmt.SetRange("Document Type", PurchOrderCmt."Document Type"::Order);
+        // PurchOrderCmt.SetRange("No.", FromPurchRcptHeader."Order No.");
+        // PurchLine.SetRange("Document Type", PurchLine."Document Type"::Order);
+        // PurchLine.SetRange("Document No.", PurchOrder."No.");
+        // PurchLine.SetFilter("Type", '<>%1', PurchLine.Type::" ");
+        // if PurchLine.FindSet() then begin
+        //     repeat
+        //         Message('%1', PurchLine.Type);
+        //         Message('%1', PurchLine."Line No.");
+        //     until PurchLine.Next() = 0;
+        // end;
 
-        PurchOrderCmt.Reset();
-        PurchOrderCmt.SetRange("Document Type", PurchOrderCmt."Document Type"::Order);
-        PurchOrderCmt.SetRange("No.", FromPurchRcptHeader."Order No.");
+        // PurchOrderCmt.SetRange("Document Line No.", PurchLine."Line No.");
+        // PurchInvCmt.Reset();
 
-        PurchInvCmt.Reset();
-        PurchLine.SetRange("Document Type", PurchLine."Document Type"::Order);
-        PurchLine.SetRange("Document No.", PurchOrder."No.");
-        PurchInvCmt.Validate("Document Type", PurchInvCmt."Document Type"::Invoice);
-        PurchInvCmt.Validate("No.", ToPurchHeader."No.");
-        if PurchLine.FindSet() then begin
-            repeat
-                PurchInvCmt.Validate("Document Line No.", PurchLine."Line No.");
-            until PurchLine.Next() = 0
-        end;
-        PurchInvCmt.Insert(true);
-        PurchInvCmt.Reset();
-        PurchInvCmt.SetRange("Document Type", PurchInvCmt."Document Type"::Invoice);
-        PurchInvCmt.SetRange("No.", ToPurchHeader."No.");
-        Message('Purch order cmt count %1', PurchOrderCmt.Count());
-        Message('Purch Invoice  cmt count %1', PurchInvCmt.Count());
+        // if PurchOrderCmt.FindSet() then begin
+        //     repeat
+        //         PurchInvCmt.Init();
+        //         PurchInvCmt."Document Type" := PurchInvCmt."Document Type"::Invoice;
+        //         PurchInvCmt."No." := ToPurchHeader."No.";
+        //         PurchInvCmt."Line No." := PurchOrderCmt."Line No.";
+        //         PurchInvCmt."Document Line No." := PurchOrderCmt."Document Line No.";
+        //         Message('PurchOrdCmt No. %1 / PurchInvCmt No.%2', PurchOrderCmt."No.", PurchInvCmt."No.");
 
-        if PurchOrderCmt.FindSet() then begin
-            repeat
-                PurchInvCmt.Validate(Date, PurchOrderCmt.Date);
-                PurchInvCmt.Validate(Code, PurchOrderCmt.Code);
-                PurchInvCmt.Validate(Comment, PurchOrderCmt.Comment);
-                PurchInvCmt.Modify();
+        //         PurchInvCmt.Insert(true);
+        //         PurchInvCmt.TransferFields(PurchOrderCmt, false);
+        //         PurchInvCmt.Modify(true);
+        //     until PurchOrderCmt.Next() = 0
+        // end;
 
-            until PurchOrderCmt.Next() = 0
-        end;
-
-        Message('Comment Line Transfer Complete');
+        // Message('Comment Line Transfer Complete');
     end;
 
     [EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Post", 'OnAfterPostPurchaseDoc', '', false, false)]
@@ -165,6 +164,37 @@ codeunit 50201 CITReceiptToInvoiceMgmt
         end;
     end;
 
+    [EventSubscriber(ObjectType::Codeunit, Codeunit::"Purch.-Get Receipt", 'OnAfterInsertInvoiceLineFromReceiptLine', '', false, false)]
+    local procedure InsertInvoiceLineCmtFromReceiptLine(var PurchRcptLine: Record "Purch. Rcpt. Line"; var PurchLine: Record "Purchase Line"; PurchRcptLine2: Record "Purch. Rcpt. Line"; TransferLine: Boolean)
+    var
+        PurchInvCmt: Record "Purch. Comment Line";
+        PurchRcptCmt: Record "Purch. Comment Line";
+    begin
+        Message('Transfer Line %1', TransferLine);
+        if not TransferLine then
+            exit;
+
+
+        PurchRcptCmt.SetRange("Document Type", PurchRcptCmt."Document Type"::Receipt);
+        PurchRcptCmt.SetRange("No.", PurchRcptLine."Document No.");
+        PurchRcptCmt.SetRange("Document Line No.", PurchRcptLine."Line No.");
+
+        if PurchRcptCmt.FindSet() then begin
+            repeat
+                PurchInvCmt.Init();
+                PurchInvCmt."Document Type" := PurchInvCmt."Document Type"::Invoice;
+                PurchInvCmt."No." := PurchRcptCmt."No.";
+                PurchInvCmt."Line No." := PurchRcptCmt."Line No.";
+                PurchInvCmt."Document Line No." := PurchLine."Line No.";
+                Message('PurchOrdCmt No. %1 / PurchInvCmt No.%2', PurchRcptCmt."No.", PurchInvCmt."No.");
+
+                PurchInvCmt.Insert(true);
+                PurchInvCmt.TransferFields(PurchRcptCmt, false);
+                PurchInvCmt.Modify(true);
+
+            until PurchRcptCmt.Next() = 0;
+        end;
+    end;
 
     var
         PurchHeader: Record "Purchase Header";
