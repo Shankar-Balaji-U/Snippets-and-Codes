@@ -268,7 +268,8 @@
 			"name": "Function Argument, Tag, Embedded",
 			"scope": "variable.parameter, keyword.other.unit",
 			"settings": {
-				"foreground": "#e6bb00"
+				"fontStyle":"italic",
+				"foreground": "#e67520"
 			}
 		},
 		{
